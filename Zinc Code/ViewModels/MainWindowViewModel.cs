@@ -20,6 +20,9 @@ namespace Zinc_Code.ViewModels
         [ObservableProperty]
         private string _filename = string.Empty;
 
+        [ObservableProperty]
+        private string _filepath = string.Empty;
+
         public MainWindowViewModel(IStorageProvider storageProvider)
         {
             _storageProvider = storageProvider;
@@ -51,6 +54,7 @@ namespace Zinc_Code.ViewModels
                 var selected = filePicker[0];
 
                 Filename = selected.Name;
+                _filepath = selected.Path.AbsolutePath;
 
                 await using var readStream = await selected.OpenReadAsync();
                 using var reader = new StreamReader(readStream);
@@ -67,29 +71,36 @@ namespace Zinc_Code.ViewModels
         {
             try
             {
-                var filePicker = await _storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                if (string.IsNullOrEmpty(Filename))
                 {
-                    Title = "选择代码文件",
-                    AllowMultiple = false,
-                    FileTypeFilter = new[]
+                    var filePicker = await _storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                     {
+                        Title = "选择代码文件",
+                        AllowMultiple = false,
+                        FileTypeFilter = new[]
+                        {
                         new FilePickerFileType("代码文件")
                         {
                             Patterns = new[] { "*.cpp", "*.c", "*.h", "*.hpp" },
                             MimeTypes = new[] { "text/plain" }
                         }
                     }
-                });
+                    });
 
-                if (filePicker == null || filePicker.Count == 0)
-                {
-                    return;
+                    if (filePicker == null || filePicker.Count == 0)
+                    {
+                        return;
+                    }
+                    var selected = filePicker[0];
+
+                    await using var writeStream = await selected.OpenWriteAsync();
+                    using var writer = new StreamWriter(writeStream);
+                    await writer.WriteAsync(Document.Text);
                 }
-                var selected = filePicker[0];
-
-                await using var writeStream = await selected.OpenWriteAsync();
-                using var writer = new StreamWriter(writeStream);
-                await writer.WriteAsync(Document.Text);
+                else
+                {
+                    await new StreamWriter(Filepath).WriteAsync(Document.Text);
+                }
             }
             catch (Exception ex)
             {
