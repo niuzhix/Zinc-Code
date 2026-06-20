@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using HotAvalonia;
 using System.Linq;
 using Zinc_Code.ViewModels;
 using Zinc_Code.Views;
@@ -13,6 +14,7 @@ namespace Zinc_Code
     {
         public override void Initialize()
         {
+            this.UseHotReload();
             AvaloniaXamlLoader.Load(this);
         }
 

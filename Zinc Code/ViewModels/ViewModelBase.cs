@@ -4,5 +4,8 @@ namespace Zinc_Code.ViewModels
 {
     public abstract class ViewModelBase : ObservableObject
     {
+        public ViewModelBase()
+        {
+        }
     }
 }

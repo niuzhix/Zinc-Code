@@ -1,12 +1,10 @@
 ﻿using Avalonia.Platform.Storage;
-using AvaloniaEdit.Document;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Tmds.DBus.Protocol;
 
 namespace Zinc_Code.ViewModels
 {
@@ -15,17 +13,23 @@ namespace Zinc_Code.ViewModels
         private readonly IStorageProvider _storageProvider;
 
         [ObservableProperty]
-        private TextDocument _document = new TextDocument();
+        private ObservableCollection<EditorViewModel> _documents = new();
 
         [ObservableProperty]
-        private string _filename = string.Empty;
-
-        [ObservableProperty]
-        private string _filepath = string.Empty;
+        private EditorViewModel? _selectedDocument;
 
         public MainWindowViewModel(IStorageProvider storageProvider)
         {
             _storageProvider = storageProvider;
+            NewDocument();
+        }
+
+        [RelayCommand]
+        private void NewDocument()
+        {
+            var doc = new EditorViewModel();
+            Documents.Add(doc);
+            SelectedDocument = doc;
         }
 
         [RelayCommand]
@@ -47,31 +51,33 @@ namespace Zinc_Code.ViewModels
                     }
                 });
 
-                if (filePicker==null || filePicker.Count == 0)
-                {
-                    return;
-                }
+                if (filePicker == null || filePicker.Count == 0) return;
+
                 var selected = filePicker[0];
-
-                Filename = selected.Name;
-                _filepath = selected.Path.AbsolutePath;
-
                 await using var readStream = await selected.OpenReadAsync();
                 using var reader = new StreamReader(readStream);
-                Document = new TextDocument(await reader.ReadToEndAsync());
+                var content = await reader.ReadToEndAsync();
+
+                var doc = new EditorViewModel(selected.Name, selected.Path.AbsolutePath, content);
+                Documents.Add(doc);
+                SelectedDocument = doc;
             }
             catch (Exception ex)
             {
-                Document = new TextDocument($"读取文件失败: {ex.Message}");
+                var doc = new EditorViewModel("错误", "", $"读取文件失败: {ex.Message}");
+                Documents.Add(doc);
+                SelectedDocument = doc;
             }
         }
 
         [RelayCommand]
         public async Task SaveCode()
         {
+            if (SelectedDocument == null) return;
+
             try
             {
-                if (string.IsNullOrEmpty(Filename))
+                if (string.IsNullOrEmpty(SelectedDocument.Filename))
                 {
                     var filePicker = await _storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                     {
@@ -79,32 +85,54 @@ namespace Zinc_Code.ViewModels
                         AllowMultiple = false,
                         FileTypeFilter = new[]
                         {
-                        new FilePickerFileType("代码文件")
-                        {
-                            Patterns = new[] { "*.cpp", "*.c", "*.h", "*.hpp" },
-                            MimeTypes = new[] { "text/plain" }
+                            new FilePickerFileType("代码文件")
+                            {
+                                Patterns = new[] { "*.cpp", "*.c", "*.h", "*.hpp" },
+                                MimeTypes = new[] { "text/plain" }
+                            }
                         }
-                    }
                     });
 
-                    if (filePicker == null || filePicker.Count == 0)
-                    {
-                        return;
-                    }
-                    var selected = filePicker[0];
+                    if (filePicker == null || filePicker.Count == 0) return;
 
+                    var selected = filePicker[0];
                     await using var writeStream = await selected.OpenWriteAsync();
                     using var writer = new StreamWriter(writeStream);
-                    await writer.WriteAsync(Document.Text);
+                    await writer.WriteAsync(SelectedDocument.Document.Text);
+
+                    SelectedDocument.Filename = selected.Name;
+                    SelectedDocument.Filepath = selected.Path.AbsolutePath;
                 }
                 else
                 {
-                    await new StreamWriter(Filepath).WriteAsync(Document.Text);
+                    await using var writer = new StreamWriter(SelectedDocument.Filepath);
+                    await writer.WriteAsync(SelectedDocument.Document.Text);
                 }
             }
             catch (Exception ex)
             {
-                Document = new TextDocument($"读取文件失败: {ex.Message}");
+                var doc = new EditorViewModel("错误", "", $"保存文件失败: {ex.Message}");
+                Documents.Add(doc);
+                SelectedDocument = doc;
+            }
+        }
+
+        [RelayCommand]
+        private void CloseDocument(EditorViewModel doc)
+        {
+            if (doc == null) return;
+
+            if (Documents.Count <= 1)
+            {
+                NewDocument();
+            }
+
+            if (Documents.Remove(doc))
+            {
+                if (ReferenceEquals(SelectedDocument, doc))
+                {
+                    SelectedDocument = Documents.Count > 0 ? Documents[^1] : null;
+                }
             }
         }
     }

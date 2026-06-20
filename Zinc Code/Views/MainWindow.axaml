@@ -1,9 +1,11 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:Zinc_Code.Views"
         xmlns:vm="using:Zinc_Code.ViewModels"
+        xmlns:zinc_code="using:Zinc_Code"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+        xmlns:ic="using:FluentIcons.Avalonia" 
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Zinc_Code.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -16,23 +18,43 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid x:Name="ContentPagePane">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.75*" />
-            <ColumnDefinition Width="0.125*" />
-            <ColumnDefinition Width="0.125*" />
-        </Grid.ColumnDefinitions>
-        <AvaloniaEdit:TextEditor Grid.Column="0" x:Name="Code"
-                          ShowLineNumbers="True"
-                          FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
-                          FontSize="16"
-                          FontWeight="DemiBold"
-                          Background="#1e1e1e"
-                          Foreground="#dcdcdc"
-                          Document="{Binding Document,Mode=TwoWay}"
-                          />
-        <Button Grid.Column="1" Content="Open" Command="{Binding ReadCodeCommand}"/>
-        <Button Grid.Column="2" Content="Save" Command="{Binding SaveCodeCommand}"/>
-     </Grid>
-    
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Spacing="10">
+            <Button Command="{Binding NewDocumentCommand}">新建</Button>
+            <Button Command="{Binding ReadCodeCommand}">打开</Button>
+            <Button Command="{Binding SaveCodeCommand}">保存</Button>
+        </StackPanel>
+
+        <TabControl ItemsSource="{Binding Documents}"
+                    SelectedItem="{Binding SelectedDocument}"
+                    Margin="10">
+            
+            <TabControl.ItemTemplate>
+                <DataTemplate DataType="vm:EditorViewModel">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" 
+                                Command="{Binding $parent[TabControl].DataContext.CloseDocumentCommand}"
+                                CommandParameter="{Binding}"
+                                Width="24" Height="18"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                FontSize="8">
+                            <ic:FluentIcon Icon="Dismiss"/>
+                        </Button>
+                        <TextBlock Text="{Binding Filename}" 
+                                   VerticalAlignment="Center"
+                                   FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
+                                   FontSize="18"
+                                   FontWeight="DemiBold"/>
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+
+            <TabControl.ContentTemplate>
+                <DataTemplate DataType="vm:EditorViewModel">
+                    <views:EditorView />
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+    </DockPanel>
 </Window>
