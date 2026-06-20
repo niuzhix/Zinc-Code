@@ -19,17 +19,20 @@
     <Grid x:Name="ContentPagePane">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.75*" />
-            <ColumnDefinition Width="0.25*" />
+            <ColumnDefinition Width="0.125*" />
+            <ColumnDefinition Width="0.125*" />
         </Grid.ColumnDefinitions>
         <AvaloniaEdit:TextEditor Grid.Column="0" x:Name="Code"
-                           ShowLineNumbers="True"
-                           
-                           FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
-                           FontSize="16"
-                           FontWeight="DemiBold"
-                           Background="#1e1e1e"
-                           Foreground="#dcdcdc"
-                           />
+                          ShowLineNumbers="True"
+                          FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
+                          FontSize="16"
+                          FontWeight="DemiBold"
+                          Background="#1e1e1e"
+                          Foreground="#dcdcdc"
+                          Document="{Binding Document,Mode=TwoWay}"
+                          />
+        <Button Grid.Column="1" Content="Open" Command="{Binding ReadCodeCommand}"/>
+        <Button Grid.Column="2" Content="Save" Command="{Binding SaveCodeCommand}"/>
      </Grid>
-
+    
 </Window>

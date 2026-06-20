@@ -20,10 +20,13 @@ namespace Zinc_Code
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(),
-                };
+                var mainWindow = new MainWindow();
+
+                var storageProvider = mainWindow.StorageProvider;
+
+                mainWindow.DataContext = new MainWindowViewModel(storageProvider);
+
+                desktop.MainWindow = mainWindow;
             }
 
             base.OnFrameworkInitializationCompleted();
