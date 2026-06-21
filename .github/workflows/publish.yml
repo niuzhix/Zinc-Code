@@ -3,10 +3,13 @@ name: Build and Release
 on:
   push:
     tags:
-      - '*'                # 任何标签推送触发
+      - '*'
+
+permissions:
+  contents: write   # 关键：授予 Release 创建权限
 
 env:
-  PROJECT_PATH: '.'        # 项目文件/解决方案路径（若不在根目录请修改，空格自动处理）
+  PROJECT_PATH: '.'        # 项目文件/解决方案路径
   OUTPUT_DIR: './publish'
   APP_NAME: 'Zinc Code'    # 应用名称（含空格）
 
@@ -18,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0    # 获取完整历史，用于生成变更日志
+          fetch-depth: 0
 
       - name: Setup .NET 10.0
         uses: actions/setup-dotnet@v4
@@ -60,7 +63,7 @@ jobs:
           Compress-Archive -Path "${{ env.OUTPUT_DIR }}/win-x64/self-contained/*" `
             -DestinationPath "${{ env.APP_NAME }}-${{ env.VERSION }}-win-x64-self-contained.zip"
 
-      # ---------- 生成 Release 说明（支持多行） ----------
+      # ---------- 生成 Release 说明 ----------
       - name: Generate Release Notes
         id: release_notes
         shell: pwsh
@@ -75,7 +78,6 @@ jobs:
           if (Test-Path "RELEASE_NOTES.md") {
               $notes = Get-Content "RELEASE_NOTES.md" -Raw
           }
-          # 多行输出到 GITHUB_OUTPUT
           $delimiter = "EOF_NOTES"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "notes<<$delimiter"
           Add-Content -Path $env:GITHUB_OUTPUT -Value $notes
