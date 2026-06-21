@@ -1,0 +1,114 @@
+name: Avalonia Build and Release (Windows)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  PROJECT_PATH: 'src/Zinc Code.Desktop/Zinc Code.Desktop.csproj'
+  OUTPUT_DIR: 'publish'
+
+jobs:
+  build:
+    name: Build for Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            self-contained: true
+            output-name: 'Zinc Code-win-x64'
+          - rid: win-x64
+            self-contained: false
+            output-name: 'Zinc Code-win-x64-fdd'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Publish application
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} `
+            -c Release `
+            -r ${{ matrix.rid }} `
+            --self-contained ${{ matrix.self-contained }} `
+            -p:PublishSingleFile=${{ matrix.self-contained }} `
+            -p:PublishTrimmed=${{ matrix.self-contained }} `
+            -p:IncludeNativeLibrariesForSelfExtract=${{ matrix.self-contained }} `
+            -o ${{ env.OUTPUT_DIR }}/${{ matrix.output-name }}
+
+      - name: Zip artifacts
+        run: |
+          cd ${{ env.OUTPUT_DIR }}
+          7z a -tzip ${{ matrix.output-name }}.zip ./${{ matrix.output-name }}/*
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output-name }}
+          path: ${{ env.OUTPUT_DIR }}/${{ matrix.output-name }}.zip
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: artifacts/**/*.zip
+          body: |
+            ## 📦 安装说明
+
+            ### 独立运行时版本（推荐）
+            - 文件：`Zinc Code-win-x64.zip`
+            - 说明：包含 .NET 10 运行时，解压即可运行，无需安装任何依赖
+            - 适用：大多数 Windows 10/11 用户
+
+            ### 依赖框架版本
+            - 文件：`Zinc Code-win-x64-fdd.zip`
+            - 说明：不包含 .NET 运行时，文件更小，但需要先安装 [.NET 10 运行时](https://dotnet.microsoft.com/download/dotnet/10.0)
+            - 适用：已安装 .NET 10 环境的用户
+
+            ## 🔧 使用方法
+
+            1. 下载对应版本的 zip 包
+            2. 解压到任意目录
+            3. 运行 `Zinc Code.exe` 启动应用程序
+
+            ## 📝 更新日志
+
+            ${{ github.event.head_commit.message }}
+
+            ---
+
+            > ⚠️ 此版本为预发布草稿，请确认无误后点击 **Publish release** 正式发布
