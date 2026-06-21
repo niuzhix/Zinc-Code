@@ -1,4 +1,5 @@
-﻿using Avalonia.Platform.Storage;
+﻿using Avalonia;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -134,6 +135,12 @@ namespace Zinc_Code.ViewModels
                     SelectedDocument = Documents.Count > 0 ? Documents[^1] : null;
                 }
             }
+        }
+
+        [RelayCommand]
+        private static void Exit()
+        {
+            Environment.Exit(0);
         }
     }
 }

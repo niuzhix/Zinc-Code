@@ -19,15 +19,19 @@
     </Design.DataContext>
 
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Spacing="10">
-            <Button Command="{Binding NewDocumentCommand}">新建</Button>
-            <Button Command="{Binding ReadCodeCommand}">打开</Button>
-            <Button Command="{Binding SaveCodeCommand}">保存</Button>
-        </StackPanel>
+
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding NewDocumentCommand}"/>
+                <MenuItem Header="_Open..." Command="{Binding ReadCodeCommand}"/>
+                <MenuItem Header="_Save..." Command="{Binding SaveCodeCommand}"/>
+                <Separator />
+                <MenuItem Header="_Exit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+        </Menu>
 
         <TabControl ItemsSource="{Binding Documents}"
-                    SelectedItem="{Binding SelectedDocument}"
-                    Margin="10">
+                    SelectedItem="{Binding SelectedDocument}">
             
             <TabControl.ItemTemplate>
                 <DataTemplate DataType="vm:EditorViewModel">
@@ -44,7 +48,7 @@
                         <TextBlock Text="{Binding Filename}" 
                                    VerticalAlignment="Center"
                                    FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
-                                   FontSize="18"
+                                   FontSize="14"
                                    FontWeight="DemiBold"/>
                     </DockPanel>
                 </DataTemplate>
