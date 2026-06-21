@@ -14,6 +14,5 @@
                           FontWeight="DemiBold"
                           Background="#1e1e1e"
                           Foreground="#dcdcdc"
-                          Document="{Binding Document,Mode=TwoWay}"
-                          />
+                          Document="{Binding Document,Mode=TwoWay}"/>
 </UserControl>

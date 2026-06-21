@@ -19,6 +19,8 @@ namespace Zinc_Code.ViewModels
         [ObservableProperty]
         private EditorViewModel? _selectedDocument;
 
+        private int NewDocCount = 0;
+
         public MainWindowViewModel(IStorageProvider storageProvider)
         {
             _storageProvider = storageProvider;
@@ -28,7 +30,7 @@ namespace Zinc_Code.ViewModels
         [RelayCommand]
         private void NewDocument()
         {
-            var doc = new EditorViewModel();
+            var doc = new EditorViewModel(NewDocCount++);
             Documents.Add(doc);
             SelectedDocument = doc;
         }
