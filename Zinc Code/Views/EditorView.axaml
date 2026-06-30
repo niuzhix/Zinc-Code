@@ -7,12 +7,56 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Zinc_Code.Views.EditorView"
              x:DataType="vm:EditorViewModel">
-  <AvaloniaEdit:TextEditor Grid.Column="0" x:Name="Code"
-                          ShowLineNumbers="True"
-                          FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
-                          FontSize="16"
-                          FontWeight="DemiBold"
-                          Background="#1e1e1e"
-                          Foreground="#dcdcdc"
-                          Document="{Binding Document,Mode=TwoWay}"/>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.7*"/>
+            <ColumnDefinition Width="0.3*"/>
+        </Grid.ColumnDefinitions>
+        
+        <AvaloniaEdit:TextEditor Grid.Column="0" 
+                                 x:Name="Code"
+                                 ShowLineNumbers="True"
+                                 FontFamily="Fira Code, Cascadia Code, JetBrains Mono, monospace, Consolas"
+                                 FontSize="16"
+                                 FontWeight="DemiBold"
+                                 Background="#1e1e1e"
+                                 Foreground="#dcdcdc"
+                                 Document="{Binding Document, Mode=TwoWay}"/>
+        
+        <StackPanel Grid.Column="1" Margin="10">
+            <TextBlock Text="编译输出" FontWeight="Bold" Margin="0,0,0,5"/>
+            
+            <Button Command="{Binding CompileCommand}"
+                    IsEnabled="{Binding IsCompiling}"
+                    Margin="0,0,0,10"
+                    HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="编译"/>
+                    <TextBlock Text="{Binding CompilationStatus}" Margin="10,0,0,0"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Command="{Binding ClearOutputCommand}"
+                    Margin="0,0,0,10"
+                    HorizontalAlignment="Stretch">
+                <TextBlock Text="清空输出" HorizontalAlignment="Center"/>
+            </Button>
+            
+            <Border Background="#1e1e1e" 
+                    CornerRadius="4" 
+                    Padding="8"
+                    MinHeight="200"
+                    MaxHeight="400">
+                <ScrollViewer>
+                    <TextBlock Text="{Binding Output}"
+                               Foreground="#dcdcdc"
+                               FontFamily="Consolas, monospace"
+                               FontSize="13"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Top"/>
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+    </Grid>
 </UserControl>

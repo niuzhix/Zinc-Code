@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="using:Zinc_Code.Views"
         xmlns:vm="using:Zinc_Code.ViewModels"
-        xmlns:zinc_code="using:Zinc_Code"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ic="using:FluentIcons.Avalonia" 
@@ -24,9 +23,14 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Command="{Binding NewDocumentCommand}"/>
                 <MenuItem Header="_Open..." Command="{Binding ReadCodeCommand}"/>
-                <MenuItem Header="_Save..." Command="{Binding SaveCodeCommand}"/>
+                <MenuItem Header="_Save" Command="{Binding SaveCodeCommand}"/>
                 <Separator />
                 <MenuItem Header="_Exit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <!-- 添加编译菜单 -->
+            <MenuItem Header="_Build">
+                <MenuItem Header="_Compile" Command="{Binding SelectedDocument.CompileCommand}"/>
+                <MenuItem Header="_Clear Output" Command="{Binding SelectedDocument.ClearOutputCommand}"/>
             </MenuItem>
         </Menu>
 

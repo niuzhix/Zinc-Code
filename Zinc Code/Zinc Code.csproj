@@ -31,6 +31,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Zinc Code.Compiler\Zinc Code.Compiler.csproj" />
 		<ProjectReference Include="..\Zinc Code.Core\Zinc Code.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Tools\**\*.*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 </Project>
